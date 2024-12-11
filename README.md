@@ -1,11 +1,16 @@
 
 # Hybrid TD3-World Model for Robotic Learning in the Robosuite "Lift" Environment
 
-This project implements a hybrid reinforcement learning framework that integrates a Twin Delayed Deep Deterministic Policy Gradient (TD3) agent with a world model. The system is designed to enhance sample efficiency and enable action planning for robotic tasks, specifically in the Robosuite "Lift" environment.
+This project implements a hybrid reinforcement learning framework that integrates a Twin Delayed Deep Deterministic 
+Policy Gradient (TD3) agent with a world model. The Architecture for the TD3 model comes from Dr. Phil Tabor's course which you 
+can find [here](https://www.udemy.com/course/actor-critic-methods-from-paper-to-code-with-pytorch/?kw=modern+reinfor&src=sac&couponCode=LEARNNOWPLANS).
+ The system is designed to enhance sample efficiency and enable action
+planning for robotic tasks, specifically in the Robosuite "Lift" environment.
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [System Architecture](#system-architecture)
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
 - [Setup and Installation](#setup-and-installation)
@@ -26,6 +31,36 @@ This project combines model-free (TD3) and model-based (world model) reinforceme
 - **Hybrid Approach**: Uses real and imagined experiences for efficient learning and integrates planning for action selection.
 
 The framework is tested in the "Lift" task, where a robotic arm manipulates an object to a target position.
+
+## **System Architecture**
+
+This project integrates a model-free reinforcement learning approach (TD3) with a model-based world model to create a hybrid system that enhances sample efficiency and enables planning in robotic learning tasks. The components are described below:
+
+### **1. TD3 Model**
+The TD3 (Twin Delayed Deep Deterministic Policy Gradient) model serves as the foundation for learning a policy to solve the task. Key features include:
+
+- **Actor Network**: Maps state observations to continuous actions.
+- **Critic Networks (Twin Critics)**: Two independent networks estimate Q-values, mitigating overestimation bias by taking the minimum Q-value during updates.
+- **Replay Buffer**: Stores experiences for off-policy learning, improving sample efficiency and breaking temporal correlations.
+- **Exploration Noise**: Gaussian noise is added to the actions during training to encourage exploration.
+- **Target Networks**: Maintained for both actor and critic networks to stabilize learning via smoothed target updates.
+
+### **2. World Model**
+The world model simulates environment dynamics, predicting future states and rewards. It is trained on data collected by the TD3 model and incorporates:
+
+- **Image Encoder (CNN)**: Processes raw image inputs into latent representations through convolutional layers and adaptive average pooling.
+- **State Encoder (MLP)**: Encodes state vectors into the same latent space as the image encoder.
+- **Recurrent State-Space Model (RNN)**: A GRU-based architecture that models latent dynamics, predicting future states and rewards.
+- **Decoders**:  
+  - **State Decoder**: Reconstructs states from latent representations.  
+  - **Reward Predictor**: Predicts rewards using latent states and actions.
+
+
+### **Integration**
+The hybrid system combines the strengths of both models:
+- **TD3 for Policy Learning**: Learns an optimal policy from real environment interactions.
+- **World Model for Planning**: Imagines trajectories to guide decision-making and augment training data with synthetic experiences.
+- **Imagination-Augmented Training**: The agent uses both real and imagined experiences to improve sample efficiency and learning speed.
 
 ## Project Structure
 
@@ -52,8 +87,8 @@ The framework is tested in the "Lift" task, where a robotic arm manipulates an o
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd <repository-folder>
+   git clone https://github.com/Ctdunn/td3-hybrid.git
+   cd td3-hybrid
    ```
 
 2. Install dependencies:
