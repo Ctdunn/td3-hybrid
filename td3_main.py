@@ -6,8 +6,8 @@ from td3_torch import Agent
 
 if __name__ == '__main__':
 
-    if not os.path.exists("../tmp/td3"):
-        os.makedirs("../tmp/td3")
+    if not os.path.exists("tmp/td3"):
+        os.makedirs("tmp/td3")
     # "Door", "Lift", "Stack", "TwoArmLift"
     env_name = "Lift"
 

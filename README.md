@@ -69,35 +69,33 @@ The framework is tested in the "Lift" task, where a robotic arm manipulates an o
 ## Usage
 
 ### TD3 Model Training
-1. Edit `main.py` to configure training parameters.
+1. Edit `td3_main.py` to configure training parameters.
 2. Run the script:
    ```bash
-   python main.py
+   python td3_main.py
    ```
-
+### Test TD3 Model
+1. Set the episode number for how many episodes you would like (currently set to 3).
+2. Run the script:
+   ```bash
+   python test.py
+   ```
+3. This will display a window with the robotic arm performing the task.
 ### Data Collection
 1. Use the trained TD3 model to collect data:
    ```bash
    python data_collection.py
    ```
 
-2. Data will be saved in the `states` and `deletevid` directories.
+2. Data will be saved in the `states` and `videos` directories.
 
 ### World Model Training
 1. Train the world model using the collected data:
    ```bash
-   python world_model_training.py
+   python train_world_model.py
    ```
 
 2. Checkpoints will be saved in the current directory.
-
-### Hybrid Agent Training
-1. Train the hybrid TD3-world model agent:
-   ```bash
-   python hybrid_td3.py
-   ```
-
-2. Models and reward history will be saved in the `tmp/hybrid_td3` directory.
 
 ### Testing and Visualization
 1. Test the world model's predictions:
@@ -110,16 +108,28 @@ The framework is tested in the "Lift" task, where a robotic arm manipulates an o
    python model_based_planning.py
    ```
 
+### Hybrid Agent Training
+1. Train the hybrid TD3-world model agent:
+   ```bash
+   python hybrid_td3.py
+   ```
+
+2. Models and reward history will be saved in the `tmp/hybrid_td3` directory.
+
+
+
+
 ## Results
-
-The hybrid system demonstrated improved sample efficiency and planning capabilities, with the world model accurately predicting future states and rewards. Refer to the visualizations in the results directory for qualitative comparisons.
-
+The World Model has currently only been trained for around 4 epoch due to lack of CUDA device at the time. 
+However, even with such a small training cycle the initial results produced with **`test_world_model.py`** 
+was able to generate promising results . 
+When a full world model training cycle has been completed results will be updated here.
+![Example Image](reward_predictions.png)
 ## Future Work
 
-- Scaling to complex tasks and multi-robot scenarios.
+- Complete training, evaluate results, and modify as needed.
+- Scaling to more complex tasks and multi-robot scenarios.
 - Integrating alternative imagination strategies.
 - Exploring additional planning techniques for hybrid systems.
 
-## License
 
-This project is released under the MIT License.

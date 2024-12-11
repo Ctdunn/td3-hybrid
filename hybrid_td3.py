@@ -26,9 +26,7 @@ class HybridTD3Agent(Agent):
         """Generate imagined trajectories using the world model."""
         imagined_transitions = []
 
-        # Generate multiple trajectories
         for _ in range(num_trajectories):
-            # Use current policy to generate actions
             actions = []
             current_state = state
 
@@ -41,7 +39,6 @@ class HybridTD3Agent(Agent):
             # Debugging remove
             #print(f"Actions shape: {actions.shape}, Actions: {actions}")
 
-            # Generate trajectory using world model
             trajectory = self.planner.generator.generate_trajectory(
                 state, image, actions
             )
@@ -49,7 +46,6 @@ class HybridTD3Agent(Agent):
             # Debugging remove
             #print(f"Generated trajectory: {trajectory}")
 
-            # Store transitions
             for t in range(len(actions)):
                 if t + 1 < len(trajectory['predicted_states']):  # Safeguard
                     transition = {
@@ -72,19 +68,15 @@ class HybridTD3Agent(Agent):
         if self.memory.mem_ctr < self.batch_size * 10:
             return
 
-        # Regular TD3 learning from real experience
         super().learn()
 
-        # Add imagined experience if we have current state/image
         if real_state is not None and real_image is not None:
-            # Generate imagined trajectories
             num_imagined = int(self.batch_size * self.imagination_ratio)
             imagined_transitions = self.imagine_trajectories(
                 real_state, real_image,
                 num_trajectories=max(1, num_imagined // self.planner.planning_horizon)
             )
 
-            # Add imagined transitions to buffer
             for transition in imagined_transitions:
                 self.memory.store_transition(
                     transition['state'],
@@ -97,11 +89,9 @@ class HybridTD3Agent(Agent):
     def choose_action_with_planning(self, state, image, use_planning_prob=0.3):
         """Choose action using either planning or direct policy."""
         if np.random.random() < use_planning_prob:
-            # Use planning
             action, _, _ = self.planner.plan_next_action(state, image)
             return action
         else:
-            # Use regular TD3 policy
             return self.choose_action(state)
 
 
@@ -113,16 +103,12 @@ def train_hybrid_agent(env, num_episodes=1000, save_dir='tmp/hybrid_td3'):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
-    # Helper function to preprocess observations
     def preprocess_observation(observation, selected_keys):
-        # Concatenate values from the selected keys
         return np.concatenate([observation[key] for key in selected_keys if key in observation])
 
-    # Initialize world model and hybrid agent
     obs_spec = env.observation_spec()
     print("Observation spec keys:", obs_spec.keys())
 
-    # Filter keys to calculate state_dim
     selected_keys = [
         "robot0_joint_pos_cos", "robot0_joint_pos_sin", "robot0_joint_vel",
         "robot0_eef_pos", "robot0_eef_quat",
@@ -170,21 +156,17 @@ def train_hybrid_agent(env, num_episodes=1000, save_dir='tmp/hybrid_td3'):
         steps = 0
 
         while not done:
-            # Get current image
             current_image = env.sim.render(
                 width=640, height=480, camera_name="agentview"
             )
 
-            # Choose action using hybrid approach
             action = agent.choose_action_with_planning(
                 observation, current_image
             )
 
-            # Take step in environment
             next_observation, reward, done, info = env.step(action)
             next_observation = preprocess_observation(next_observation, selected_keys)
 
-            # Store transition
             agent.remember(observation, action, reward, next_observation, done)
 
             # Learn from both real and imagined experience
@@ -200,13 +182,11 @@ def train_hybrid_agent(env, num_episodes=1000, save_dir='tmp/hybrid_td3'):
               f"Reward: {episode_reward:.2f}, "
               f"100-episode Average: {avg_reward:.2f}")
 
-        # Save if we have a new best model
         if episode_reward > best_reward:
             best_reward = episode_reward
             agent.save_models()
             print(f"New best reward: {best_reward:.2f}")
 
-        # Periodic saving
         if episode % 100 == 0:
             save_path = os.path.join(save_dir, f'hybrid_td3_episode_{episode}')
             agent.save_models()
@@ -219,7 +199,6 @@ def train_hybrid_agent(env, num_episodes=1000, save_dir='tmp/hybrid_td3'):
 if __name__ == "__main__":
     import robosuite as suite
 
-    # Create environment
     env = suite.make(
         "Lift",
         robots=["Panda"],
@@ -230,6 +209,5 @@ if __name__ == "__main__":
         control_freq=20,
     )
 
-    # Train hybrid agent
     trained_agent, rewards = train_hybrid_agent(env)
     print("Training complete!")
